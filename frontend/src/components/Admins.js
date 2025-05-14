@@ -100,21 +100,7 @@ export default function AdminDashboard() {
   const [hospitalCapacity] = useState(150);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchAdminProfile();
-    fetchTotalDoctors();
-    fetchTotalPatients();
-    fetchDoctorOverview();
-    fetchPatientOverview();
-    fetchCompletedAppointments();
-    fetchUpcomingAppointments();
-  }, [fetchAdminProfile,
-  fetchTotalDoctors,
-  fetchTotalPatients,
-  fetchDoctorOverview,
-  fetchPatientOverview,
-  fetchCompletedAppointments,
-  fetchUpcomingAppointments]);
+
 
   const fetchAdminProfile = async () => {
     try {
@@ -285,6 +271,23 @@ export default function AdminDashboard() {
       console.error('Error fetching upcoming appointments:', error);
     }
   };
+
+
+    useEffect(() => {
+    fetchAdminProfile();
+    fetchTotalDoctors();
+    fetchTotalPatients();
+    fetchDoctorOverview();
+    fetchPatientOverview();
+    fetchCompletedAppointments();
+    fetchUpcomingAppointments();
+  }, [fetchAdminProfile,
+  fetchTotalDoctors,
+  fetchTotalPatients,
+  fetchDoctorOverview,
+  fetchPatientOverview,
+  fetchCompletedAppointments,
+  fetchUpcomingAppointments]);
 
   const renderDashboard = () => {
     const occupancyRate = ((totalPatients / hospitalCapacity) * 100).toFixed(2);
