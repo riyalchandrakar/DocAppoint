@@ -1,78 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, FileText, Users, ChevronDown, Home, UserCircle, Eye, EyeOff, Hospital, Stethoscope, Activity, UserPlus, ShieldCheck } from 'lucide-react';
+import { 
+  Calendar, Clock, FileText, Users, ChevronDown, Home, 
+  UserCircle, Eye, EyeOff, Hospital, Stethoscope, Activity, 
+  UserPlus, Shield, PlusCircle, Settings, LogOut, ClipboardList,CheckCircle,XCircle
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../constants/constants';
 import toast from 'react-hot-toast';
 
-const Button = ({ children, variant = 'primary', className = '', ...props }) => (
+const Button = ({ children, variant = 'primary', className = '', icon: Icon, ...props }) => (
   <button
-    className={`inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+    className={`inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
       variant === 'primary'
-        ? 'text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+        ? 'text-white bg-teal-600 hover:bg-teal-700 shadow-lg hover:shadow-teal-500/30'
         : variant === 'outline'
-        ? 'text-blue-600 border-blue-600 hover:bg-blue-50 focus:ring-blue-500'
-        : 'text-blue-600 border-blue-600 hover:bg-blue-50 focus:ring-blue-500'
+        ? 'text-teal-700 bg-white hover:bg-gray-50 border border-teal-600'
+        : 'text-gray-700 bg-white hover:bg-gray-100'
     } ${className}`}
     {...props}
   >
+    {Icon && <Icon className="w-4 h-4 mr-2" />}
     {children}
   </button>
 );
 
-const Card = ({ children, className = '' }) => (
-  <div className={`bg-white rounded-lg shadow-md ${className}`}>
+const Card = ({ children, className = '', hoverEffect = false }) => (
+  <div className={`rounded-xl p-6 transition-all duration-300 ${hoverEffect ? 'hover:shadow-lg hover:border-teal-300' : ''} bg-white border border-gray-100 ${className}`}>
     {children}
   </div>
 );
 
-const CardHeader = ({ children, icon: Icon }) => (
-  <div className="px-4 py-5 border-b border-gray-200 sm:px-6 flex items-center justify-between">
-    {children}
-    {Icon && <Icon className="h-5 w-5 text-blue-600 ml-2" />}
+const CardHeader = ({ children, icon: Icon, className = '' }) => (
+  <div className={`flex items-center justify-between pb-4 mb-4 border-b border-gray-100 ${className}`}>
+    <h3 className="text-lg font-bold text-gray-800">{children}</h3>
+    {Icon && <Icon className="w-5 h-5 text-teal-600" />}
   </div>
 );
 
-const CardTitle = ({ children }) => (
-  <h3 className="text-lg leading-6 font-medium text-gray-900">{children}</h3>
+const Input = ({ label, className = '', icon: Icon, ...props }) => (
+  <div className={`space-y-1 ${className}`}>
+    {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
+    <div className="relative">
+      {Icon && (
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon className="h-5 w-5 text-gray-400" />
+        </div>
+      )}
+      <input
+        className={`mt-1 block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm`}
+        {...props}
+      />
+    </div>
+  </div>
 );
 
-const CardContent = ({ children }) => (
-  <div className="px-4 py-5 sm:p-6">{children}</div>
+const Select = ({ label, className = '', children, ...props }) => (
+  <div className={`space-y-1 ${className}`}>
+    {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
+    <select
+      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+      {...props}
+    >
+      {children}
+    </select>
+  </div>
 );
 
-const CardFooter = ({ children }) => (
-  <div className="px-4 py-4 sm:px-6">{children}</div>
-);
-
-const Input = ({ ...props }) => (
-  <input
-    className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md px-1 h-6"
-    {...props}
-  />
-);
-
-const Label = ({ children, htmlFor }) => (
-  <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-700">
+const Badge = ({ children, variant = 'primary', className = '' }) => (
+  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+    variant === 'primary' ? 'bg-teal-100 text-teal-800' :
+    variant === 'success' ? 'bg-green-100 text-green-800' :
+    variant === 'danger' ? 'bg-red-100 text-red-800' :
+    'bg-gray-100 text-gray-800'
+  } ${className}`}>
     {children}
-  </label>
+  </span>
 );
 
-const Select = ({ children, ...props }) => (
-  <select
-    className="mt-1 block w-full pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-    {...props}
-  >
-    {children}
-  </select>
-);
-
-export default function AdminDashboard() {
-  const [showDoctors, setShowDoctors] = useState(false);
-  const [showPatients, setShowPatients] = useState(false);
-  const [activeTab, setActiveTab] = useState('Dashboard');
-  const [isEditing, setIsEditing] = useState(false);
+const AdminDashboard = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [adminInfo, setAdminInfo] = useState(null);
   const [editedInfo, setEditedInfo] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [doctorData, setDoctorData] = useState({
     firstName: '',
     lastName: '',
@@ -98,9 +107,15 @@ export default function AdminDashboard() {
   const [completedAppointments, setCompletedAppointments] = useState([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [hospitalCapacity] = useState(150);
+  const [expandedSections, setExpandedSections] = useState({
+    doctors: false,
+    patients: false
+  });
+
   const navigate = useNavigate();
+  
 
-
+  // ... (keep all your existing fetch functions like fetchAdminProfile, fetchTotalDoctors, etc.)
 
   const fetchAdminProfile = async () => {
     try {
@@ -289,183 +304,206 @@ export default function AdminDashboard() {
   fetchCompletedAppointments,
   fetchUpcomingAppointments]);
 
+
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
   const renderDashboard = () => {
     const occupancyRate = ((totalPatients / hospitalCapacity) * 100).toFixed(2);
+    
     return (
-      <>
+      <div className="space-y-6">
+        {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader icon={Stethoscope}>
-              <CardTitle className="text-sm font-medium">Total Doctors</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalDoctors}</div>
-              <p className="text-xs text-gray-500">Active medical staff</p>
-            </CardContent>
+          <Card hoverEffect>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-teal-100 mr-4">
+                <Stethoscope className="w-6 h-6 text-teal-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Doctors</p>
+                <p className="text-2xl font-bold text-gray-800">{totalDoctors}</p>
+              </div>
+            </div>
           </Card>
-          <Card>
-            <CardHeader icon={Users}>
-              <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalPatients}</div>
-              <p className="text-xs text-gray-500">Currently admitted</p>
-            </CardContent>
+          
+          <Card hoverEffect>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-blue-100 mr-4">
+                <Users className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Patients</p>
+                <p className="text-2xl font-bold text-gray-800">{totalPatients}</p>
+              </div>
+            </div>
           </Card>
-          <Card>
-            <CardHeader icon={Activity}>
-              <CardTitle className="text-sm font-medium">Hospital Occupancy</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{occupancyRate}%</div>
-              <p className="text-xs text-gray-500">Bed occupancy rate</p>
-            </CardContent>
+          
+          <Card hoverEffect>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-purple-100 mr-4">
+                <Activity className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Hospital Occupancy</p>
+                <p className="text-2xl font-bold text-gray-800">{occupancyRate}%</p>
+              </div>
+            </div>
           </Card>
         </div>
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader icon={Stethoscope}>
-              <CardTitle className="text-sm font-medium">Doctor Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{doctorOverview.length}</div>
-              <p className="text-xs text-gray-500">Total doctors on staff</p>
-            </CardContent>
-            <CardFooter className="p-2">
-              <Button 
-                variant="ghost" 
-                className="w-full text-sm text-gray-500 hover:text-gray-900 transition-colors"
-                onClick={() => setShowDoctors(!showDoctors)}
-              >
-                {showDoctors ? "Hide" : "View All"} Doctors
-                <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${showDoctors ? "rotate-180" : ""}`} />
-              </Button>
-            </CardFooter>
-            {showDoctors && (
-              <div className="px-4 pb-4">
-                {doctorOverview.map((doctor, index) => (
-                  <div key={index} className="flex justify-between items-center py-2 border-t">
+
+        {/* Doctor Overview */}
+        <Card>
+          <CardHeader icon={Stethoscope}>
+            Doctor Overview
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => toggleSection('doctors')}
+              icon={ChevronDown}
+              className="transform transition-transform"
+              style={{ transform: expandedSections.doctors ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            />
+          </CardHeader>
+          
+          {expandedSections.doctors ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {doctorOverview.map((doctor, index) => (
+                <div key={index} className="p-4 border border-gray-100 rounded-lg hover:border-teal-200 transition-colors">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
+                      <UserCircle className="w-5 h-5 text-teal-600" />
+                    </div>
                     <div>
-                      <p className="text-sm font-medium">{doctor.name}</p>
+                      <h4 className="font-medium text-gray-800">
+                        Dr. {doctor.name}
+                      </h4>
                       <p className="text-xs text-gray-500">{doctor.specialty}</p>
                     </div>
-                    <p className="text-sm">{doctor.patients} patients</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </Card>
+                  <div className="flex justify-between items-center">
+                    <Badge>{doctor.patients} patients</Badge>
+                    <Button variant="outline" size="sm">View Details</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-2">
+              <p className="text-sm text-gray-500">
+                {doctorOverview.length} doctors on staff
+              </p>
+            </div>
+          )}
+        </Card>
+
+        {/* Patient Overview */}
+        <Card>
+          <CardHeader icon={Users}>
+            Patient Overview
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => toggleSection('patients')}
+              icon={ChevronDown}
+              className="transform transition-transform"
+              style={{ transform: expandedSections.patients ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            />
+          </CardHeader>
+          
+          {expandedSections.patients ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {patientOverview.map((patient, index) => (
+                <div key={index} className="p-4 border border-gray-100 rounded-lg hover:border-teal-200 transition-colors">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      <UserCircle className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-800">
+                      {patient.name}
+                    </h4>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <Badge>{patient.appointments} appointments</Badge>
+                    <Button variant="outline" size="sm">View History</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-2">
+              <p className="text-sm text-gray-500">
+                {patientOverview.length} patients in care
+              </p>
+            </div>
+          )}
+        </Card>
+
+        {/* Activity Feed */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
-            <CardHeader icon={Users}>
-              <CardTitle className="text-sm font-medium">Patient Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{patientOverview.length}</div>
-              <p className="text-xs text-gray-500">Total admitted patients</p>
-            </CardContent>
-            <CardFooter className="p-2">
-              <Button 
-                variant="ghost" 
-                className="w-full text-sm text-gray-500 hover:text-gray-900 transition-colors"
-                onClick={() => setShowPatients(!showPatients)}
-              >
-                {showPatients ? "Hide" : "View All"} Patients
-                <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${showPatients ? "rotate-180" : ""}`} />
-              </Button>
-            </CardFooter>
-            {showPatients && (
-              <div className="px-4 pb-4">
-                {patientOverview.map((patient, index) => (
-                  <div key={index} className="py-2 border-t">
-                    <p className="text-sm font-medium">{patient.name}</p>
+            <CardHeader icon={Clock}>Recent Activity</CardHeader>
+            <div className="space-y-4">
+              {completedAppointments.slice(0, 3).map((appointment, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    {appointment.status === "completed" ? (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-red-500" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      {appointment.doctorId?.firstName} {appointment.status === "completed" ? "completed" : "cancelled"} appointment
+                    </p>
                     <p className="text-xs text-gray-500">
-                      Total Appointments: {patient.appointments}
+                      {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
                     </p>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+              {completedAppointments.length === 0 && (
+                <p className="text-center text-gray-500 py-4">No recent activity</p>
+              )}
+            </div>
+          </Card>
+
+          <Card>
+            <CardHeader icon={Calendar}>Upcoming Schedule</CardHeader>
+            <div className="space-y-4">
+              {upcomingAppointments.slice(0, 3).map((appointment, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <Calendar className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      {appointment.doctorId?.firstName}'s appointment
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
+                    </p>
+                    <Badge variant="primary" className="mt-1">{appointment.reason}</Badge>
+                  </div>
+                </div>
+              ))}
+              {upcomingAppointments.length === 0 && (
+                <p className="text-center text-gray-500 py-4">No upcoming appointments</p>
+              )}
+            </div>
           </Card>
         </div>
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-                    <CardHeader>
-                      <CardTitle>Recent Activity</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {completedAppointments.slice(0, 3).map((appointment, index) => (
-                          <li key={appointment._id || index} className="flex items-center space-x-2">
-                            <Clock className="h-4 w-4 text-blue-600" />
-                            <span>
-                              <strong>
-                                {appointment.doctorId?.firstName} {appointment.doctorId?.lastName} 
-                              </strong>
-                              {appointment.status === "completed" ? " completed" : " cancelled"} appointment with{" "}
-                              <strong>
-                                {appointment.patientId?.firstName} {appointment.patientId?.lastName}
-                              </strong>{" "}
-                              on {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
-                            </span>
-                          </li>
-                        ))}
-                  
-                        {/* Static fallback if no completed appointments */}
-                        {completedAppointments.length === 0 && (
-                          <>
-                            <li className="flex items-center space-x-2">
-                              <FileText className="h-4 w-4 text-gray-400" />
-                              <span className="text-gray-400">No records found.</span>
-                            </li>
-                          </>
-                        )}
-                      </ul>
-                    </CardContent>
-                  </Card>
-          <Card>
-                  <CardHeader>
-                    <CardTitle>Upcoming Schedule</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {upcomingAppointments.slice(0, 3).map((appointment, index) => (
-                        <li key={appointment._id || index} className="flex items-center space-x-2">
-                          <Calendar className="h-4 w-4 text-blue-600" />
-                          <span>
-                          <strong>
-                              {appointment.doctorId?.firstName} {appointment.doctorId?.lastName}
-                            </strong>{"'s "}
-                            appointment with{" "}
-                            <strong>
-                              {appointment.patientId?.firstName} {appointment.patientId?.lastName}
-                            </strong>{" "}
-                            on {new Date(appointment.date).toLocaleDateString()} at {appointment.time}. <span className="text-gray-500">{"(" + appointment.reason + ")"}</span>
-                          </span>
-                        </li>
-                      ))}
-          
-                      {/* Fallback if there are no upcoming appointments */}
-                      {upcomingAppointments.length === 0 && (
-                        <>
-                          <li className="flex items-center space-x-2">
-                            <Clock className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-400">No upcoming schedule.</span>
-                          </li>
-                        </>
-                      )}
-                    </ul>
-                  </CardContent>
-                </Card>
-        </div>
-      </>
+      </div>
     );
   };
 
   const renderProfile = () => {
-    if (!adminInfo) {
-      return <div>Loading profile...</div>;
-    }
-
     const handleInputChange = (e) => {
       const { name, value } = e.target;
       setEditedInfo(prev => ({ ...prev, [name]: value }));
@@ -474,10 +512,6 @@ export default function AdminDashboard() {
     const handleSave = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
         const response = await fetch(BASE_URL + '/admin/profile', {
           method: 'PUT',
           headers: {
@@ -494,68 +528,70 @@ export default function AdminDashboard() {
           const updatedAdmin = await response.json();
           setAdminInfo(updatedAdmin.admin);
           setIsEditing(false);
-          return toast.success("Profile updated successfully.");
+          toast.success("Profile updated successfully.");
         } else {
-          const errorData = await response.json();
-          return toast.error("An error occurred");
+          toast.error("An error occurred");
         }
       } catch (error) {
-        return toast.error('An error occurred. Please try again.');
+        toast.error('An error occurred. Please try again.');
       }
     };
 
     return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Admin Profile</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  value={isEditing ? editedInfo.firstName : adminInfo.firstName}
-                  onChange={handleInputChange}
-                  readOnly={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  value={isEditing ? editedInfo.lastName : adminInfo.lastName}
-                  onChange={handleInputChange}
-                  readOnly={!isEditing}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={isEditing ? editedInfo.email : adminInfo.email}
-                onChange={handleInputChange}
-                readOnly={!isEditing}
-              />
-            </div>
-          </form>
-        </CardContent>
-        <CardFooter>
-          {isEditing ? (
-            <>
-              <Button onClick={handleSave} className="mr-2">Save</Button>
-              <Button onClick={() => setIsEditing(false)} variant="outline">Cancel</Button>
-            </>
-          ) : (
-            <Button onClick={() => setIsEditing(true)} className="ml-auto">Edit Profile</Button>
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader icon={UserCircle}>
+          Admin Profile
+          {!isEditing && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsEditing(true)}
+              icon={PlusCircle}
+            >
+              Edit Profile
+            </Button>
           )}
-        </CardFooter>
+        </CardHeader>
+        
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="First Name"
+              name="firstName"
+              value={isEditing ? editedInfo?.firstName : adminInfo?.firstName}
+              onChange={handleInputChange}
+              readOnly={!isEditing}
+            />
+            <Input
+              label="Last Name"
+              name="lastName"
+              value={isEditing ? editedInfo?.lastName : adminInfo?.lastName}
+              onChange={handleInputChange}
+              readOnly={!isEditing}
+            />
+          </div>
+          
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            value={isEditing ? editedInfo?.email : adminInfo?.email}
+            onChange={handleInputChange}
+            readOnly={!isEditing}
+            icon={UserCircle}
+          />
+          
+          {isEditing && (
+            <div className="flex justify-end space-x-3 pt-4">
+              <Button variant="outline" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Changes
+              </Button>
+            </div>
+          )}
+        </div>
       </Card>
     );
   };
@@ -570,10 +606,6 @@ export default function AdminDashboard() {
       e.preventDefault();
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          alert('You are not authenticated. Please log in.');
-          return;
-        }
         const response = await fetch(BASE_URL + '/admin/add-doctor', {
           method: 'POST',
           headers: {
@@ -594,94 +626,118 @@ export default function AdminDashboard() {
           });
           fetchDoctorOverview();
           fetchTotalDoctors();
-          return toast.success('Doctor added successfully');
+          toast.success('Doctor added successfully');
         } else if (response.status === 401) {
           navigate("/login");
-          return toast.error('Your session has expired. Please log in again.');
+          toast.error('Your session has expired. Please log in again.');
         } else {
-          const errorData = await response.json();
-          return toast.error('An error occurred. Please try again.');
+          toast.error('An error occurred. Please try again.');
         }
       } catch (error) {
-        return toast.error('An error occurred. Please try again.');
+        toast.error('An error occurred. Please try again.');
       }
     };
 
     return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Add New Doctor</CardTitle>
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader icon={UserPlus}>
+          Add New Doctor
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" name="firstName" value={doctorData.firstName} onChange={handleInputChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" name="lastName" value={doctorData.lastName} onChange={handleInputChange} required />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" value={doctorData.email} onChange={handleInputChange} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="specialty">Specialty</Label>
-              <Select id="specialty" name="specialty" value={doctorData.specialty} onChange={handleInputChange} required>
-                <option value="">Choose a specialty</option>
-                <option value="cardiology">Cardiology</option>
-                  <option value="neurology">Neurology</option>
-                  <option value="pediatrics">Pediatrics</option>
-                  <option value="oncology">Oncology</option>
-                  <option value="orthopedics">Orthopedics</option>
-                  <option value="dermatology">Dermatology</option>
-                  <option value="gastroenterology">Gastroenterology</option>
-                  <option value="psychiatry">Psychiatry</option>
-                  <option value="gynecology">Gynecology</option>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="licenseNumber">License Number</Label>
-              <Input id="licenseNumber" name="licenseNumber" value={doctorData.licenseNumber} onChange={handleInputChange} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Phone Number</Label>
-              <Input id="phoneNumber" name="phoneNumber" type="tel" value={doctorData.phoneNumber} onChange={handleInputChange} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showDoctorPassword ? "text" : "password"}
-                  value={doctorData.password}
-                  onChange={handleInputChange}
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowDoctorPassword(!showDoctorPassword)}
-                >
-                  {showDoctorPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
-                  <span className="sr-only">
-                    {showDoctorPassword ? "Hide password" : "Show password"}
-                  </span>
-                </Button>
-              </div>
-            </div>
-            <Button type="submit" className="ml-auto">Add Doctor</Button>
-          </form>
-        </CardContent>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="First Name"
+              name="firstName"
+              value={doctorData.firstName}
+              onChange={handleInputChange}
+              required
+            />
+            <Input
+              label="Last Name"
+              name="lastName"
+              value={doctorData.lastName}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            value={doctorData.email}
+            onChange={handleInputChange}
+            required
+            icon={UserCircle}
+          />
+          
+          <Select
+            label="Specialty"
+            name="specialty"
+            value={doctorData.specialty}
+            onChange={handleInputChange}
+            required
+          >
+            <option value="">Choose a specialty</option>
+            <option value="cardiology">Cardiology</option>
+            <option value="neurology">Neurology</option>
+            <option value="pediatrics">Pediatrics</option>
+            <option value="oncology">Oncology</option>
+            <option value="orthopedics">Orthopedics</option>
+            <option value="dermatology">Dermatology</option>
+            <option value="gastroenterology">Gastroenterology</option>
+            <option value="psychiatry">Psychiatry</option>
+            <option value="gynecology">Gynecology</option>
+          </Select>
+          
+          <Input
+            label="License Number"
+            name="licenseNumber"
+            value={doctorData.licenseNumber}
+            onChange={handleInputChange}
+            required
+            icon={ClipboardList}
+          />
+          
+          <Input
+            label="Phone Number"
+            name="phoneNumber"
+            type="tel"
+            value={doctorData.phoneNumber}
+            onChange={handleInputChange}
+            required
+          />
+          
+          <Input
+            label="Password"
+            name="password"
+            type={showDoctorPassword ? "text" : "password"}
+            value={doctorData.password}
+            onChange={handleInputChange}
+            required
+            icon={Shield}
+            append={
+              <button
+                type="button"
+                className="absolute right-0 top-0 h-full px-3 flex items-center"
+                onClick={() => setShowDoctorPassword(!showDoctorPassword)}
+              >
+                {showDoctorPassword ? (
+                  <EyeOff className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <Eye className="h-5 w-5 text-gray-400" />
+                )}
+              </button>
+            }
+          />
+          
+          <div className="flex justify-end pt-4">
+            <Button type="submit">
+              Add Doctor
+            </Button>
+          </div>
+        </form>
       </Card>
     );
   };
@@ -695,14 +751,11 @@ export default function AdminDashboard() {
     const handleSubmit = async (e) => {
       e.preventDefault();
       if (adminData.password !== adminData.confirmPassword) {
-        alert("Passwords don't match");
+        toast.error("Passwords don't match");
         return;
       }
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          return toast.error('You are not authenticated. Please log in.');
-        }
         const response = await fetch(BASE_URL + '/admin/add-admin', {
           method: 'POST',
           headers: {
@@ -719,148 +772,217 @@ export default function AdminDashboard() {
             password: '',
             confirmPassword: ''
           });
-          return toast.success('Admin added successfully');
+          toast.success('Admin added successfully');
         } else if (response.status === 401) {
           navigate("/login");
-          return toast.error('Your session has expired. Please log in again.');
+          toast.error('Your session has expired. Please log in again.');
         } else {
-          const errorData = await response.json();
-          return toast.error("An error occurred.");
+          toast.error("An error occurred.");
         }
       } catch (error) {
-        return toast.error('An error occurred. Please try again.');
+        toast.error('An error occurred. Please try again.');
       }
     };
 
     return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Add New Admin</CardTitle>
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader icon={Shield}>
+          Add New Admin
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" name="firstName" value={adminData.firstName} onChange={handleInputChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" name="lastName" value={adminData.lastName} onChange={handleInputChange} required />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" value={adminData.email} onChange={handleInputChange} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showAdminPassword ? "text" : "password"}
-                  value={adminData.password}
-                  onChange={handleInputChange}
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowAdminPassword(!showAdminPassword)}
-                >
-                  {showAdminPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
-                  <span className="sr-only">
-                    {showAdminPassword ? "Hide password" : "Show password"}
-                  </span>
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showAdminPassword ? "text" : "password"}
-                  value={adminData.confirmPassword}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-            <Button type="submit" className="ml-auto">Add Admin</Button>
-          </form>
-        </CardContent>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="First Name"
+              name="firstName"
+              value={adminData.firstName}
+              onChange={handleInputChange}
+              required
+            />
+            <Input
+              label="Last Name"
+              name="lastName"
+              value={adminData.lastName}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            value={adminData.email}
+            onChange={handleInputChange}
+            required
+            icon={UserCircle}
+          />
+          
+          <Input
+            label="Password"
+            name="password"
+            type={showAdminPassword ? "text" : "password"}
+            value={adminData.password}
+            onChange={handleInputChange}
+            required
+            icon={Shield}
+            append={
+              <button
+                type="button"
+                className="absolute right-0 top-0 h-full px-3 flex items-center"
+                onClick={() => setShowAdminPassword(!showAdminPassword)}
+              >
+                {showAdminPassword ? (
+                  <EyeOff className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <Eye className="h-5 w-5 text-gray-400" />
+                )}
+              </button>
+            }
+          />
+          
+          <Input
+            label="Confirm Password"
+            name="confirmPassword"
+            type={showAdminPassword ? "text" : "password"}
+            value={adminData.confirmPassword}
+            onChange={handleInputChange}
+            required
+            icon={Shield}
+          />
+          
+          <div className="flex justify-end pt-4">
+            <Button type="submit">
+              Add Admin
+            </Button>
+          </div>
+        </form>
       </Card>
     );
   };
 
   return (
-    <div className="min-h-screen bg-blue-600">
-      <header className="bg-white p-4 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <Hospital className="h-6 w-6 text-blue-600" />
-          <span className="font-bold text-xl">DocAppoint</span>
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar Navigation */}
+      <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-md">
+        <div className="flex items-center justify-center h-16 border-b border-gray-100">
+          <div className="flex items-center space-x-2">
+            <Hospital className="h-6 w-6 text-teal-600" />
+            <span className="text-xl font-bold text-gray-800">DocAppoint</span>
+          </div>
         </div>
-        <Button variant="outline" onClick={() => navigate('/')}>Sign Out</Button>
-      </header>
-      <nav className="bg-blue-700 text-white p-4">
-        <ul className="flex space-x-4 justify-center">
-          <li>
-            <Button
-              variant={activeTab === 'Dashboard' ? "outline" : "ghost"}
-              className={`hover:bg-white hover:text-blue-600 ${activeTab === 'Dashboard' ? 'bg-white text-blue-600' : 'text-white'}`}
-              onClick={() => setActiveTab('Dashboard')}
-            >
-              <Home className="w-4 h-4 mr-2" />
-              Dashboard
-            </Button>
-          </li>
-          <li>
-            <Button
-              variant={activeTab === 'Profile' ? "outline" : "ghost"}
-              className={`hover:bg-white hover:text-blue-600 ${activeTab === 'Profile' ? 'bg-white text-blue-600' : 'text-white'}`}
-              onClick={() => setActiveTab('Profile')}
-            >
-              <UserCircle className="w-4 h-4 mr-2" />
-              Profile
-            </Button>
-          </li>
-          <li>
-            <Button
-              variant={activeTab === 'Add Doctor' ? "outline" : "ghost"}
-              className={`hover:bg-white hover:text-blue-600 ${activeTab === 'Add Doctor' ? 'bg-white text-blue-600' : 'text-white'}`}
-              onClick={() => setActiveTab('Add Doctor')}
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              Add Doctor
-            </Button>
-          </li>
-          <li>
-            <Button
-              variant={activeTab === 'Add Admin' ? "outline" : "ghost"}
-              className={`hover:bg-white hover:text-blue-600 ${activeTab === 'Add Admin' ? 'bg-white text-blue-600' : 'text-white'}`}
-              onClick={() => setActiveTab('Add Admin')}
-            >
-              <ShieldCheck className="w-4 h-4 mr-2" />
-              Add Admin
-            </Button>
-          </li>
-        </ul>
-      </nav>
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-white mb-8">Welcome, {adminInfo ? `${adminInfo.firstName} ${adminInfo.lastName}` : 'Admin'}</h1>
-        {activeTab === 'Dashboard' && renderDashboard()}
-        {activeTab === 'Profile' && renderProfile()}
-        {activeTab === 'Add Doctor' && renderAddDoctor()}
-        {activeTab === 'Add Admin' && renderAddAdmin()}
-      </main>
+        
+        <nav className="p-4 space-y-1">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              activeTab === 'dashboard' 
+                ? 'bg-teal-50 text-teal-700 font-medium' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Home className="w-5 h-5" />
+            <span>Dashboard</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              activeTab === 'profile' 
+                ? 'bg-teal-50 text-teal-700 font-medium' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <UserCircle className="w-5 h-5" />
+            <span>Profile</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('add-doctor')}
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              activeTab === 'add-doctor' 
+                ? 'bg-teal-50 text-teal-700 font-medium' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <UserPlus className="w-5 h-5" />
+            <span>Add Doctor</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('add-admin')}
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              activeTab === 'add-admin' 
+                ? 'bg-teal-50 text-teal-700 font-medium' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Shield className="w-5 h-5" />
+            <span>Add Admin</span>
+          </button>
+        </nav>
+        
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
+          <button
+            onClick={() => navigate('/logout')}
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
+      
+      {/* Main Content */}
+      <div className="pl-64">
+        {/* Top Header */}
+        <header className="bg-white shadow-sm">
+          <div className="flex items-center justify-between px-8 py-4">
+            <h1 className="text-2xl font-bold text-gray-800">
+              {activeTab === 'dashboard' && 'Dashboard'}
+              {activeTab === 'profile' && 'My Profile'}
+              {activeTab === 'add-doctor' && 'Add New Doctor'}
+              {activeTab === 'add-admin' && 'Add New Admin'}
+            </h1>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
+                  <UserCircle className="w-5 h-5 text-teal-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-800">
+                    {adminInfo?.firstName} {adminInfo?.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500">Administrator</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        
+        {/* Page Content */}
+        <main className="p-8">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-800">
+              {activeTab === 'dashboard' && 'Hospital Overview'}
+              {activeTab === 'profile' && 'My Profile'}
+              {activeTab === 'add-doctor' && 'Register New Doctor'}
+              {activeTab === 'add-admin' && 'Register New Administrator'}
+            </h2>
+            <p className="text-gray-600">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
+          
+          {activeTab === 'dashboard' && renderDashboard()}
+          {activeTab === 'profile' && renderProfile()}
+          {activeTab === 'add-doctor' && renderAddDoctor()}
+          {activeTab === 'add-admin' && renderAddAdmin()}
+        </main>
+      </div>
     </div>
   );
-}
+};
+
+export default AdminDashboard;
