@@ -24,7 +24,8 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:3000", 
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -53,7 +54,10 @@ app.use('/api/patient', patientRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
+  // Serve static files
   app.use(express.static(path.join(__dirname, '../frontend/build')));
+  
+  // Handle React routing - return all requests to React app
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
   });
@@ -62,10 +66,14 @@ if (process.env.NODE_ENV === 'production') {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).json({ error: 'Server error' });
 });
 
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log('API Endpoints:');
+  console.log(`- POST /api/login`);
+  console.log(`- POST /api/signup`);
+  console.log('Client-side routes will be handled by React');
 });
