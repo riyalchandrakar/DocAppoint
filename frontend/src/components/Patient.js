@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, FileText, Users, ChevronDown, Home, UserCircle, Calendar as CalendarIcon, Hospital, LogOut, PlusCircle, Edit, X, Check ,User, Mail, Phone} from 'lucide-react';
+import { useCallback,useState, useEffect } from 'react';
+import { Calendar, Clock, FileText, Users, Home, UserCircle, Calendar as CalendarIcon, Hospital, LogOut, PlusCircle, Edit, X, Check ,User, Mail} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../constants/constants';
 import { toast } from "react-hot-toast";
@@ -49,9 +49,6 @@ const CardContent = ({ children, className = '' }) => (
   <div className={`p-6 ${className}`}>{children}</div>
 );
 
-const CardFooter = ({ children, className = '' }) => (
-  <div className={`px-6 py-4 border-t border-gray-100 ${className}`}>{children}</div>
-);
 
 const Input = ({ label, icon: Icon, className = '', ...props }) => (
   <div className="space-y-1">
@@ -196,7 +193,7 @@ export default function PatientDashboard() {
   const [completedAppointments, setCompletedAppointments] = useState([]);
   const navigate = useNavigate();
 
-  const fetchPatientProfile = async () => {
+  const fetchPatientProfile = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -218,9 +215,9 @@ export default function PatientDashboard() {
     } catch (error) {
       console.error('Error fetching patient profile:', error);
     }
-  };
+  },[navigate]);
 
-  const fetchDoctors = async () => {
+  const fetchDoctors = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -241,9 +238,9 @@ export default function PatientDashboard() {
     } catch (error) {
       console.error('Error fetching doctors:', error);
     }
-  };
+  },[navigate]);
 
-  const fetchAvailableSlots = async (doctorId, date) => {
+  const fetchAvailableSlots = useCallback(async (doctorId, date) => {
     if (!doctorId || !date) return;
     try {
       const token = localStorage.getItem('token');
@@ -261,9 +258,9 @@ export default function PatientDashboard() {
     } catch (error) {
       console.error('Error fetching available slots:', error);
     }
-  };
+  },[]);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -284,9 +281,9 @@ export default function PatientDashboard() {
     } catch (error) {
       console.error('Error fetching appointments:', error);
     }
-  };
+  },[navigate]);
 
-  const fetchCompletedAppointments = async () => {
+  const fetchCompletedAppointments = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -309,9 +306,9 @@ export default function PatientDashboard() {
     } catch (error) {
       console.error('Error fetching completed/cancelled appointments:', error);
     }
-  };
+  },[navigate]);
 
-  const fetchCareTeam = async () => {
+  const fetchCareTeam = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -332,9 +329,9 @@ export default function PatientDashboard() {
     } catch (error) {
       console.error('Error fetching care team:', error);
     }
-  };
+  },[navigate]);
 
-  const fetchPrescriptions = async () => {
+  const fetchPrescriptions = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -355,7 +352,7 @@ export default function PatientDashboard() {
     } catch (error) {
       console.error('Error fetching prescriptions:', error);
     }
-  };
+  },[navigate]);
 
   useEffect(() => {
     fetchPatientProfile();
@@ -364,7 +361,12 @@ export default function PatientDashboard() {
     fetchCareTeam();
     fetchPrescriptions();
     fetchCompletedAppointments();
-  }, []);
+  }, [ fetchPatientProfile,
+  fetchCareTeam,
+  fetchDoctors,
+  fetchAppointments,
+  fetchCompletedAppointments,
+  fetchPrescriptions]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -418,7 +420,6 @@ export default function PatientDashboard() {
         body: JSON.stringify(appointmentData)
       });
       if (response.ok) {
-        const result = await response.json();
         setAppointmentData({
           doctorId: '',
           date: '',

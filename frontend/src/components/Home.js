@@ -1,4 +1,3 @@
-import React from 'react';
 import { Calendar, Clipboard, Cog, DollarSign, HeartPulse, Hospital, Shield, User, Users, Clock, ChartBar, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,6 +42,11 @@ const Home = () => {
 
   const handleButtonClick = (route) => {
     navigate(route);
+  };
+
+  const handleNavigation = (e, path) => {
+    e.preventDefault();
+    navigate(path);
   };
 
   return (
@@ -233,25 +237,25 @@ const Home = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Product</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Features</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Pricing</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Demo</a></li>
+                <li><button onClick={(e) => handleNavigation(e, '/features')} className="text-gray-400 hover:text-white transition">Features</button></li>
+                <li><button onClick={(e) => handleNavigation(e, '/pricing')} className="text-gray-400 hover:text-white transition">Pricing</button></li>
+                <li><button onClick={(e) => handleNavigation(e, '/demo')} className="text-gray-400 hover:text-white transition">Demo</button></li>
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Company</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition">About Us</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Careers</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Contact</a></li>
+                <li><button onClick={(e) => handleNavigation(e, '/about')} className="text-gray-400 hover:text-white transition">About Us</button></li>
+                <li><button onClick={(e) => handleNavigation(e, '/careers')} className="text-gray-400 hover:text-white transition">Careers</button></li>
+                <li><button onClick={(e) => handleNavigation(e, '/contact')} className="text-gray-400 hover:text-white transition">Contact</button></li>
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Legal</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Privacy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Terms</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Security</a></li>
+                <li><button onClick={(e) => handleNavigation(e, '/privacy')} className="text-gray-400 hover:text-white transition">Privacy</button></li>
+                <li><button onClick={(e) => handleNavigation(e, '/terms')} className="text-gray-400 hover:text-white transition">Terms</button></li>
+                <li><button onClick={(e) => handleNavigation(e, '/security')} className="text-gray-400 hover:text-white transition">Security</button></li>
               </ul>
             </div>
           </div>

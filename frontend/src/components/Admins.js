@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useCallback,useState, useEffect } from 'react';
 import { 
   Calendar, Clock,Users, ChevronDown, Home, 
   UserCircle, Eye, EyeOff, Hospital, Stethoscope, Activity, 
@@ -117,7 +117,7 @@ const AdminDashboard = () => {
 
   // ... (keep all your existing fetch functions like fetchAdminProfile, fetchTotalDoctors, etc.)
 
-  const fetchAdminProfile = async () => {
+  const fetchAdminProfile = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -140,9 +140,9 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching admin profile:', error);
     }
-  };
+  },[]);
 
-  const fetchTotalDoctors = async () => {
+  const fetchTotalDoctors = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -162,9 +162,9 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching total doctors:', error);
     }
-  };
+  },[]);
 
-  const fetchTotalPatients = async () => {
+  const fetchTotalPatients = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -184,9 +184,9 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching total patients:', error);
     }
-  };
+  },[]);
 
-  const fetchDoctorOverview = async () => {
+  const fetchDoctorOverview = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -206,9 +206,9 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching doctor overview:', error);
     }
-  };
+  },[]);
 
-  const fetchPatientOverview = async () => {
+  const fetchPatientOverview = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -228,9 +228,9 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching patient overview:', error);
     }
-  };
+  },[]);
 
-  const fetchCompletedAppointments = async () => {
+  const fetchCompletedAppointments = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -254,9 +254,9 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching completed/cancelled appointments:', error);
     }
-  };
+  },[navigate]);
 
-  const fetchUpcomingAppointments = async () => {
+  const fetchUpcomingAppointments = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -285,7 +285,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching upcoming appointments:', error);
     }
-  };
+  },[navigate]);
 
 
     useEffect(() => {

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useCallback,useState, useEffect } from 'react';
 import { 
-  Calendar, Clock, FileText, Users, ChevronDown, Home, 
+  Calendar, Clock, Users, ChevronDown, Home, 
   UserCircle, Hospital, CheckCircle, XCircle, PlusCircle,
-  Stethoscope, Pill, ClipboardList, Settings, LogOut
+  Stethoscope, LogOut
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../constants/constants';
@@ -100,13 +100,7 @@ const DoctorDashboard = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchDoctorProfile();
-    fetchPatientsWithAppointments();
-    fetchAppointments();
-    fetchCompletedAppointments();
-    fetchUpcomingAppointments();
-  }, []);
+ 
 
   const formatDate = (date) => {
     if (!date) return '';
@@ -123,7 +117,7 @@ const DoctorDashboard = () => {
   // ... (keep all your existing fetch functions like fetchDoctorProfile, fetchPatientsWithAppointments, etc.)
   // Add these functions inside your DoctorDashboard component, before the render methods
 
-const fetchDoctorProfile = async () => {
+const fetchDoctorProfile = useCallback(async () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -145,9 +139,9 @@ const fetchDoctorProfile = async () => {
   } catch (error) {
     console.error('Error fetching doctor profile:', error);
   }
-};
+},[navigate]);
 
-const fetchPatientsWithAppointments = async () => {
+const fetchPatientsWithAppointments = useCallback(async () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -168,9 +162,9 @@ const fetchPatientsWithAppointments = async () => {
   } catch (error) {
     console.error('Error fetching patients with appointments:', error);
   }
-};
+},[navigate]);
 
-const fetchAppointments = async () => {
+const fetchAppointments = useCallback(async () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -208,9 +202,9 @@ const fetchAppointments = async () => {
   } catch (error) {
     console.error('Error fetching appointments:', error);
   }
-};
+},[navigate]);
 
-const fetchCompletedAppointments = async () => {
+const fetchCompletedAppointments = useCallback(async () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -234,10 +228,10 @@ const fetchCompletedAppointments = async () => {
   } catch (error) {
     console.error('Error fetching completed appointments:', error);
   }
-};
+},[navigate]);
 
 
-const fetchExistingPrescriptions = async (patientId) => {
+const fetchExistingPrescriptions = useCallback(async (patientId) => {
   if (!patientId) return;
   try {
     const token = localStorage.getItem('token');
@@ -258,10 +252,10 @@ const fetchExistingPrescriptions = async (patientId) => {
     console.error('Error fetching existing prescriptions:', error);
     setExistingPrescriptions([]);
   }
-};
+},[]);
 
 
-const fetchUpcomingAppointments = async () => {
+const fetchUpcomingAppointments = useCallback(async () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -285,7 +279,19 @@ const fetchUpcomingAppointments = async () => {
   } catch (error) {
     console.error('Error fetching upcoming appointments:', error);
   }
-};
+},[navigate]);
+
+ useEffect(() => {
+    fetchDoctorProfile();
+    fetchPatientsWithAppointments();
+    fetchAppointments();
+    fetchCompletedAppointments();
+    fetchUpcomingAppointments();
+  }, [fetchDoctorProfile,
+  fetchAppointments,
+  fetchCompletedAppointments,
+  fetchPatientsWithAppointments,
+  fetchUpcomingAppointments]);
 
 const handleUpdateStatus = async (appointmentId, status) => {
   try {
