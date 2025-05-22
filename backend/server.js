@@ -29,32 +29,35 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Improved MongoDB connection with modern settings
+// MongoDB connection
 const connectDB = async () => {
   try {
     if (!process.env.MONGO_URI) {
       throw new Error("MONGO_URI is not defined in environment variables");
     }
-
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connected to MongoDB');
   } catch (err) {
     console.error('MongoDB connection error:', err.message);
-    process.exit(1); // Exit process with failure
+    process.exit(1);
   }
 };
-
-// Connect to MongoDB
 connectDB();
 
-// Routes
+// API Routes
 app.use('/api/signup', signupRoutes);
 app.use('/api/login', loginRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/patient', patientRoutes);
 
-
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
