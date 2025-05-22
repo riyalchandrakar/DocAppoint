@@ -54,14 +54,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/patient', patientRoutes);
 
-// Production static files serving
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
-  });
-}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
