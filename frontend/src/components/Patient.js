@@ -631,14 +631,7 @@ export default function PatientDashboard() {
             readOnly={!isEditing}
             icon={Mail}
           />
-          <Input
-            label="Phone Number"
-            name="phone"
-            value={isEditing ? editedInfo?.phone || '' : patientInfo?.phone || ''}
-            onChange={handleInputChange}
-            readOnly={!isEditing}
-            icon={Phone}
-          />
+         
         </div>
       </CardContent>
     </Card>

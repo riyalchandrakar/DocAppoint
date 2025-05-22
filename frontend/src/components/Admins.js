@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Calendar, Clock, FileText, Users, ChevronDown, Home, 
+  Calendar, Clock,Users, ChevronDown, Home, 
   UserCircle, Eye, EyeOff, Hospital, Stethoscope, Activity, 
-  UserPlus, Shield, PlusCircle, Settings, LogOut, ClipboardList,CheckCircle,XCircle
+  UserPlus, Shield, PlusCircle, LogOut, ClipboardList,CheckCircle,XCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../constants/constants';
@@ -388,7 +388,6 @@ const AdminDashboard = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <Badge>{doctor.patients} patients</Badge>
-                    <Button variant="outline" size="sm">View Details</Button>
                   </div>
                 </div>
               ))}
@@ -430,7 +429,6 @@ const AdminDashboard = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <Badge>{patient.appointments} appointments</Badge>
-                    <Button variant="outline" size="sm">View History</Button>
                   </div>
                 </div>
               ))}

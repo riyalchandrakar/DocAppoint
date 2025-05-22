@@ -908,13 +908,7 @@ const fetchAvailableSlots = async (patientId, date) => {
             <span>Patient Management</span>
           </button>
           
-          <button
-            onClick={() => navigate('/settings')}
-            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-gray-600 hover:bg-gray-100`}
-          >
-            <Settings className="w-5 h-5" />
-            <span>Settings</span>
-          </button>
+         
         </nav>
         
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
