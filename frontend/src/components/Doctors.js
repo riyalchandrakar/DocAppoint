@@ -1,8 +1,8 @@
-import { useCallback,useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { 
   Calendar, Clock, Users, ChevronDown, Home, 
   UserCircle, Hospital, CheckCircle, XCircle, PlusCircle,
-  Stethoscope, LogOut
+  Stethoscope,  LogOut
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../constants/constants';
@@ -100,7 +100,13 @@ const DoctorDashboard = () => {
 
   const navigate = useNavigate();
 
- 
+  useEffect(() => {
+    fetchDoctorProfile();
+    fetchPatientsWithAppointments();
+    fetchAppointments();
+    fetchCompletedAppointments();
+    fetchUpcomingAppointments();
+  }, []);
 
   const formatDate = (date) => {
     if (!date) return '';
@@ -114,285 +120,369 @@ const DoctorDashboard = () => {
     }));
   };
 
-  // ... (keep all your existing fetch functions like fetchDoctorProfile, fetchPatientsWithAppointments, etc.)
-  // Add these functions inside your DoctorDashboard component, before the render methods
-
-const fetchDoctorProfile = useCallback(async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    const response = await fetch(BASE_URL + '/doctor/profile', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setDoctorInfo(data);
-      setEditedInfo(data);
-    } else {
-      console.error('Failed to fetch doctor profile');
-    }
-  } catch (error) {
-    console.error('Error fetching doctor profile:', error);
-  }
-},[navigate]);
-
-const fetchPatientsWithAppointments = useCallback(async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    const response = await fetch(BASE_URL + '/doctor/patients-with-appointments', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setPatients(data);
-    } else {
-      console.error('Failed to fetch patients with appointments');
-    }
-  } catch (error) {
-    console.error('Error fetching patients with appointments:', error);
-  }
-},[navigate]);
-
-const fetchAppointments = useCallback(async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    const response = await fetch(BASE_URL + '/doctor/appointments', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      const now = new Date();
-      const sortedAppointments = data
-        .filter(appointment => {
-          const appointmentDate = new Date(appointment.date);
-          return (
-            appointmentDate > now || 
-            (
-              appointmentDate.toLocaleDateString() === now.toLocaleDateString() && 
-              appointment.time > now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            )
-          );
-        })
-        .sort((a, b) => {
-          const dateA = new Date(a.date + ' ' + a.time);
-          const dateB = new Date(b.date + ' ' + b.time);
-          return dateA - dateB;
-        });
-      setAppointments(sortedAppointments);
-    } else {
-      console.error('Failed to fetch appointments');
-    }
-  } catch (error) {
-    console.error('Error fetching appointments:', error);
-  }
-},[navigate]);
-
-const fetchCompletedAppointments = useCallback(async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    const response = await fetch(BASE_URL + '/doctor/appointment/completed', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      const sortedCompleted = data.sort((a, b) => 
-        new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time)
-      );
-      setCompletedAppointments(sortedCompleted);
-    } else {
-      console.error('Failed to fetch completed appointments');
-    }
-  } catch (error) {
-    console.error('Error fetching completed appointments:', error);
-  }
-},[navigate]);
-
-
-const fetchExistingPrescriptions = useCallback(async (patientId) => {
-  if (!patientId) return;
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(BASE_URL + `/doctor/prescriptions/${patientId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    
-    if (response.ok) {
-      const prescriptions = await response.json();
-      setExistingPrescriptions(prescriptions);
-    } else {
-      console.error('Failed to fetch existing prescriptions');
-      setExistingPrescriptions([]);
-    }
-  } catch (error) {
-    console.error('Error fetching existing prescriptions:', error);
-    setExistingPrescriptions([]);
-  }
-},[]);
-
-
-const fetchUpcomingAppointments = useCallback(async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    const response = await fetch(BASE_URL + '/doctor/appointments/upcoming', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      const sortedUpcoming = data.sort((a, b) =>
-        new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time)
-      );
-      setUpcomingAppointments(sortedUpcoming);
-    } else {
-      console.error('Failed to fetch upcoming appointments');
-    }
-  } catch (error) {
-    console.error('Error fetching upcoming appointments:', error);
-  }
-},[navigate]);
-
- useEffect(() => {
-    fetchDoctorProfile();
-    fetchPatientsWithAppointments();
-    fetchAppointments();
-    fetchCompletedAppointments();
-    fetchUpcomingAppointments();
-  }, [fetchDoctorProfile,
-  fetchAppointments,
-  fetchCompletedAppointments,
-  fetchPatientsWithAppointments,
-  fetchUpcomingAppointments]);
-
-const handleUpdateStatus = async (appointmentId, status) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(BASE_URL + `/doctor/appointment/${appointmentId}/${status}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ appointmentId })
-    });
-    if (response.ok) {
-      fetchAppointments();
-      fetchCompletedAppointments();
-      toast.success("Appointment status updated.");
-    } else {
-      toast.error("Failed to update appointment status");
-    }
-  } catch (error) {
-    console.error('Error updating appointment status:', error);
-  }
-};
-
-const handleInputChange = (e) => {
-  const { name, value } = e.target;
-  setAppointmentData(prev => ({ ...prev, [name]: value }));
-
-  if (name === 'action') {
-    setSelectedAction(value);
-  }
-
-  if (name === 'patientId') {
-    fetchExistingPrescriptions(value);
-  }
-
-  if (name === 'date' || name === 'patientId') {
-    fetchAvailableSlots(appointmentData.patientId, value);
-  }
-};
-
-const handleEditPrescription = (prescription) => {
-  setAppointmentData({
-    ...appointmentData,
-    prescriptionId: prescription._id,
-    medication: prescription.medication || '',
-    dosage: prescription.dosage || '',
-    frequency: prescription.frequency || '',
-    tilldate: prescription.tilldate || ''
-  });
-  setSelectedAction('prescribe-medication');
-};
-
-const handleDeletePrescription = async (prescriptionId) => {
-  if (window.confirm('Are you sure you want to delete this prescription?')) {
+  const fetchDoctorProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(BASE_URL + `/doctor/prescriptions/${prescriptionId}`, {
-        method: 'DELETE',
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      const response = await fetch(BASE_URL + '/doctor/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       if (response.ok) {
-        fetchExistingPrescriptions(appointmentData.patientId);
-        toast.success('Prescription deleted successfully.');
+        const data = await response.json();
+        setDoctorInfo(data);
+        setEditedInfo(data);
       } else {
-        const errorData = await response.json();
-        console.error('Error details:', errorData.details);
-        toast.error(`Failed to delete prescription.`);
+        console.error('Failed to fetch doctor profile');
       }
     } catch (error) {
-      toast.error('Error deleting prescription. Please try again.');
-      console.error('Error deleting prescription:', error);
+      console.error('Error fetching doctor profile:', error);
     }
-  }
-};
+  };
 
-// Also add this helper function if not already present
-const fetchAvailableSlots = async (patientId, date) => {
-  if (!patientId || !date) return;
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(BASE_URL + `/doctor/available-slots?patientId=${patientId}&date=${date}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+  const fetchPatientsWithAppointments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
       }
-    });
-    if (response.ok) {
-      const slots = await response.json();
-      setAvailableSlots(slots);
-    } else {
-      console.error('Failed to fetch available slots');
-      setAvailableSlots([]);
-      toast.error("Failed to fetch available slots");
+      const response = await fetch(BASE_URL + '/doctor/patients-with-appointments', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPatients(data);
+      } else {
+        console.error('Failed to fetch patients with appointments');
+      }
+    } catch (error) {
+      console.error('Error fetching patients with appointments:', error);
     }
-  } catch (error) {
-    console.error('Error fetching available slots:', error);
-    setAvailableSlots([]);
-  }
-};
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      const response = await fetch(BASE_URL + '/doctor/appointments', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const now = new Date();
+        const sortedAppointments = data
+          .filter(appointment => {
+            const appointmentDate = new Date(appointment.date);
+            return (
+              appointmentDate > now || 
+              (
+                appointmentDate.toLocaleDateString() === now.toLocaleDateString() && 
+                appointment.time > now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              )
+            );
+          })
+          .sort((a, b) => {
+            const dateA = new Date(a.date + ' ' + a.time);
+            const dateB = new Date(b.date + ' ' + b.time);
+            return dateA - dateB;
+          });
+        setAppointments(sortedAppointments);
+      } else {
+        console.error('Failed to fetch appointments');
+      }
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    }
+  };
+
+  const fetchCompletedAppointments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      const response = await fetch(BASE_URL + '/doctor/appointment/completed', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const sortedCompleted = data.sort((a, b) => 
+          new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time)
+        );
+        setCompletedAppointments(sortedCompleted);
+      } else {
+        console.error('Failed to fetch completed appointments');
+      }
+    } catch (error) {
+      console.error('Error fetching completed appointments:', error);
+    }
+  };
+
+  const fetchExistingPrescriptions = async (patientId) => {
+    if (!patientId) return;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(BASE_URL + `/doctor/prescriptions/${patientId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const prescriptions = await response.json();
+        setExistingPrescriptions(prescriptions);
+      } else {
+        console.error('Failed to fetch existing prescriptions');
+        setExistingPrescriptions([]);
+      }
+    } catch (error) {
+      console.error('Error fetching existing prescriptions:', error);
+      setExistingPrescriptions([]);
+    }
+  };
+
+  const fetchUpcomingAppointments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      const response = await fetch(BASE_URL + '/doctor/appointments/upcoming', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const sortedUpcoming = data.sort((a, b) =>
+          new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time)
+        );
+        setUpcomingAppointments(sortedUpcoming);
+      } else {
+        console.error('Failed to fetch upcoming appointments');
+      }
+    } catch (error) {
+      console.error('Error fetching upcoming appointments:', error);
+    }
+  };
+
+  const handleUpdateStatus = async (appointmentId, status) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(BASE_URL + `/doctor/appointment/${appointmentId}/${status}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ appointmentId })
+      });
+      if (response.ok) {
+        fetchAppointments();
+        fetchCompletedAppointments();
+        fetchUpcomingAppointments();
+        toast.success("Appointment status updated.");
+      } else {
+        toast.error("Failed to update appointment status");
+      }
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setAppointmentData(prev => ({ ...prev, [name]: value }));
+
+    if (name === 'action') {
+      setSelectedAction(value);
+    }
+
+    if (name === 'patientId') {
+      fetchExistingPrescriptions(value);
+    }
+
+    if ((name === 'date' && value) || (name === 'patientId' && value && appointmentData.date)) {
+      fetchAvailableSlots(value, name === 'date' ? value : appointmentData.date);
+    }
+  };
+
+  const fetchAvailableSlots = async (patientId, date) => {
+    if (!patientId || !date) return;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(BASE_URL + `/doctor/available-slots?patientId=${patientId}&date=${date}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const slots = await response.json();
+        setAvailableSlots(slots);
+      } else {
+        console.error('Failed to fetch available slots');
+        setAvailableSlots([]);
+        toast.error("Failed to fetch available slots");
+      }
+    } catch (error) {
+      console.error('Error fetching available slots:', error);
+      setAvailableSlots([]);
+    }
+  };
+
+  const handleEditPrescription = (prescription) => {
+    setAppointmentData({
+      ...appointmentData,
+      prescriptionId: prescription._id,
+      medication: prescription.medication || '',
+      dosage: prescription.dosage || '',
+      frequency: prescription.frequency || '',
+      tilldate: prescription.tilldate || ''
+    });
+    setSelectedAction('prescribe-medication');
+  };
+
+  const handleDeletePrescription = async (prescriptionId) => {
+    if (window.confirm('Are you sure you want to delete this prescription?')) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(BASE_URL + `/doctor/prescriptions/${prescriptionId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          fetchExistingPrescriptions(appointmentData.patientId);
+          toast.success('Prescription deleted successfully.');
+        } else {
+          const errorData = await response.json();
+          console.error('Error details:', errorData.details);
+          toast.error(`Failed to delete prescription.`);
+        }
+      } catch (error) {
+        toast.error('Error deleting prescription. Please try again.');
+        console.error('Error deleting prescription:', error);
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!appointmentData.patientId) {
+      toast.error("Please select a patient");
+      return;
+    }
+
+    if (selectedAction === 'prescribe-medication') {
+      try {
+        const token = localStorage.getItem('token');
+        const url = appointmentData.prescriptionId
+          ? BASE_URL + `/doctor/prescriptions/${appointmentData.prescriptionId}`
+          : BASE_URL + '/doctor/prescribe-medication';
+        const method = appointmentData.prescriptionId ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            doctorId: doctorInfo?._id,
+            patientId: appointmentData.patientId,
+            medication: appointmentData.medication,
+            dosage: appointmentData.dosage,
+            frequency: appointmentData.frequency,
+            tilldate: appointmentData.tilldate
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setAppointmentData({
+            ...appointmentData,
+            prescriptionId: '',
+            medication: '',
+            dosage: '',
+            frequency: '',
+            tilldate: ''
+          });
+          fetchExistingPrescriptions(appointmentData.patientId);
+          setSelectedAction('');
+          toast.success(appointmentData.prescriptionId 
+            ? 'Medication updated successfully' 
+            : 'Medication prescribed successfully');
+        } else {
+          const errorData = await response.json();
+          toast.error(`Failed to ${appointmentData.prescriptionId ? 'update' : 'prescribe'} medication: ${errorData.error}`);
+        }
+      } catch (error) {
+        toast.error(`Error ${appointmentData.prescriptionId ? 'updating' : 'prescribing'} medication. Please try again.`);
+      }
+    } else if (selectedAction === 'schedule-appointment') {
+      try {
+        if (!appointmentData.date || !appointmentData.time) {
+          toast.error("Please select both date and time for the appointment");
+          return;
+        }
+
+        const token = localStorage.getItem('token');
+        const response = await fetch(BASE_URL + '/doctor/schedule-appointment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            patientId: appointmentData.patientId,
+            date: appointmentData.date,
+            time: appointmentData.time,
+            reason: appointmentData.reason
+          })
+        });
+
+        if (response.ok) {
+          setAppointmentData({
+            patientId: '',
+            date: '',
+            time: '',
+            reason: '',
+            prescriptionId: '',
+            medication: '',
+            dosage: '',
+            frequency: '',
+            tilldate: ''
+          });
+          setSelectedAction('');
+          fetchAppointments();
+          fetchUpcomingAppointments();
+          toast.success('Appointment scheduled successfully.');
+        } else {
+          const errorData = await response.json();
+          toast.error(`Failed to schedule appointment: ${errorData.error}`);
+        }
+      } catch (error) {
+        toast.error('Error scheduling appointment. Please try again.');
+      }
+    }
+  };
 
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -447,7 +537,7 @@ const fetchAvailableSlots = async (patientId, date) => {
             variant="outline" 
             size="sm"
             onClick={() => toggleSection('todayAppointments')}
-            icon={expandedSections.todayAppointments ? ChevronDown : ChevronDown}
+            icon={ChevronDown}
             className="transform transition-transform"
             style={{ transform: expandedSections.todayAppointments ? 'rotate(180deg)' : 'rotate(0deg)' }}
           />
@@ -508,7 +598,7 @@ const fetchAvailableSlots = async (patientId, date) => {
             variant="outline" 
             size="sm"
             onClick={() => toggleSection('patients')}
-            icon={expandedSections.patients ? ChevronDown : ChevronDown}
+            icon={ChevronDown}
             className="transform transition-transform"
             style={{ transform: expandedSections.patients ? 'rotate(180deg)' : 'rotate(0deg)' }}
           />
@@ -714,15 +804,13 @@ const fetchAvailableSlots = async (patientId, date) => {
   };
 
   const renderPatientManagement = () => {
-    // ... (keep your existing patient management logic, but update the UI components)
-    
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader icon={Stethoscope}>
           Patient Management
         </CardHeader>
         
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <Select
             label="Select Patient"
             name="patientId"
@@ -756,6 +844,7 @@ const fetchAvailableSlots = async (patientId, date) => {
                 type="date"
                 value={appointmentData.date}
                 onChange={handleInputChange}
+                min={new Date().toISOString().split('T')[0]}
               />
               
               <Select
@@ -823,6 +912,7 @@ const fetchAvailableSlots = async (patientId, date) => {
                 value={appointmentData.medication || ''}
                 onChange={handleInputChange}
                 placeholder="Medication name"
+                required
               />
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -832,6 +922,7 @@ const fetchAvailableSlots = async (patientId, date) => {
                   value={appointmentData.dosage || ''}
                   onChange={handleInputChange}
                   placeholder="Dosage"
+                  required
                 />
                 <Input
                   label="Frequency"
@@ -839,6 +930,7 @@ const fetchAvailableSlots = async (patientId, date) => {
                   value={appointmentData.frequency || ''}
                   onChange={handleInputChange}
                   placeholder="Frequency"
+                  required
                 />
               </div>
               
@@ -848,6 +940,7 @@ const fetchAvailableSlots = async (patientId, date) => {
                 type="date"
                 value={formatDate(appointmentData.tilldate) || ''}
                 onChange={handleInputChange}
+                required
               />
             </>
           )}
@@ -861,7 +954,7 @@ const fetchAvailableSlots = async (patientId, date) => {
               </Button>
             </div>
           )}
-        </div>
+        </form>
       </Card>
     );
   };
@@ -919,7 +1012,10 @@ const fetchAvailableSlots = async (patientId, date) => {
         
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
           <button
-            onClick={() => navigate('/logout')}
+            onClick={() => {
+              localStorage.removeItem('token');
+              navigate('/login');
+            }}
             className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100"
           >
             <LogOut className="w-5 h-5" />
