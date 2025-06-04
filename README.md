@@ -65,15 +65,15 @@ MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 FRONTEND_URL=http://localhost:3000
 PORT=your_port
-
+```
 ---
 
 ## 📦 Installation & Setup
 
-
-git clone https://github.com/your-username/docappoint.git
+```bash
+git clone https://github.com/riyalchandrakar/DocAppoint.git
 cd docappoint
-
+```
 ### Backend
 
 ```bash
@@ -84,7 +84,7 @@ npm install
 
 node createAdmin.js
 node server.js
-
+```
 
 ### Frontend
 
@@ -93,8 +93,9 @@ cd ../frontend
 npm install
 
 # Optional: configure REACT_APP_BACKEND_URL in frontend/.env
-npm start
 
+npm start
+```
 
 
 
